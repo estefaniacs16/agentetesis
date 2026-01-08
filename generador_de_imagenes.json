@@ -1,0 +1,229 @@
+{
+  "name": "generador_de_imagenes",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "generate_image_prompt"
+            }
+          ]
+        }
+      },
+      "id": "df81ad8b-2531-4ab4-8e16-8030a1121474",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        144,
+        480
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].base64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        480
+      ],
+      "id": "568c77fe-2b66-4e65-b4d6-67b52dc6cd7a",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "name": "={{ $workflow.name }}_{{ Date.now() }}.jpg",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1-L0shEqPaQfCcW1QwibjECgJLcs-8ICB",
+          "mode": "list",
+          "cachedResultName": "AI Agent Images",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-L0shEqPaQfCcW1QwibjECgJLcs-8ICB"
+        },
+        "options": {}
+      },
+      "id": "74bfbd6e-9990-4ed0-9a6a-81ddd597b3d2",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        864,
+        480
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "aNNwjolkJRxyD92N",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "id": "ea0d4bab-4be0-47f9-bd72-508f2d122d65",
+      "name": "Hacer Público",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1056,
+        480
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "aNNwjolkJRxyD92N",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.freepik.com/v1/ai/text-to-image",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-freepik-api-key",
+              "value": "FPSXcf1222dbb92a5e4d16cbb1486abe07d4"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.generate_image_prompt }}\",\n  \"negative_prompt\": \"b&w, earth, cartoon, ugly\",\n  \"guidance_scale\": 1,\n  \"seed\": 42,\n  \"num_images\": 1,\n  \"image\": {\n    \"size\": \"square_1_1\"\n  },\n  \"styling\": {\n    \"style\": \"anime\",\n    \"effects\": {\n      \"color\": \"pastel\",\n      \"lightning\": \"warm\",\n      \"framing\": \"portrait\"\n    },\n    \"colors\": [\n      {\n        \"color\": \"#FF5733\",\n        \"weight\": 1\n      },\n      {\n        \"color\": \"#33FF57\",\n        \"weight\": 1\n      }\n    ]\n  },\n  \"filter_nsfw\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        384,
+        480
+      ],
+      "id": "7240b387-a659-409d-a076-f085d175bca6",
+      "name": "Generar Imagen Freepik"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fileId = $('Google Drive').first().json.id;\n\nreturn [\n  {\n    url: `https://lh3.googleusercontent.com/d/${fileId}`\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        480
+      ],
+      "id": "a1f0fa62-04df-4fa9-8d43-d1856e1926e8",
+      "name": "retorna el URL"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "generate_image_prompt": "A candid photograph, cinematic lighting, shot on 50mm lens, hyperrealistic, 8k, extremely detailed textures of two lawyers, a man and a woman, in an office setting. They are both engaged in conversation with laptops open on the desk, surrounded by legal documents and books. The light is soft natural window light creating depth and realism."
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Generar Imagen Freepik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Hacer Público",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Imagen Freepik": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "retorna el URL": {
+      "main": [
+        []
+      ]
+    },
+    "Hacer Público": {
+      "main": [
+        [
+          {
+            "node": "retorna el URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "be235baa-0b21-4d11-b9ff-a61ec947a2cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "63f5f44f08a3d532bba2756aafa851b9d24d265c72b5b69e5a4300fd687627cd"
+  },
+  "id": "BFKyYB58XSEooiWQ",
+  "tags": []
+}

@@ -1,0 +1,200 @@
+{
+  "name": "Agente legal",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"respuesta\": \"{{ $json.output }}\"\n}",
+        "options": {
+          "systemMessage": "Actúa como un Auditor Senior de Compliance Digital y Estratega Legal para Lawem Abogados (Ecuador).\n\nTu misión es auditar textos publicitarios analizando 3 dimensiones críticas simultáneamente.\n\n### 🔍 TUS 3 DIMENSIONES DE ANÁLISIS:\n\n1.  **⚖️ SEGURIDAD JURÍDICA (Ecuador):**\n    * **Regla de Oro:** Detecta \"Obligaciones de Resultado\" (ej: \"Ganamos tu juicio\", \"Te sacamos de la cárcel\"). ESTO ES ILEGAL.\n    * **Corrección:** Transfórmalo a \"Obligación de Medios\" (ej: \"Defensa técnica\", \"Estrategia experta\", \"Velamos por tus derechos\").\n    * **Normativa:** Basa tu criterio en la ética profesional y el COGEP/COIP.\n\n2.  **📢 IMPACTO DE MARKETING (Copywriting):**\n    * Analiza si el texto es aburrido o \"muy de abogado\".\n    * Si el texto es seguro pero plano, dale \"chispa\" comercial sin romper la ley.\n\n3.  **🤖 POLÍTICAS DE META/INSTAGRAM (Ads):**\n    * **Atributos Personales:** Evita preguntas directas que asuman condiciones del usuario (ej: \"¿Estás divorciado?\" puede ser bloqueado). Usa: \"Asesoría para Divorcios\".\n    * **Sensacionalismo:** Evita mayúsculas excesivas o promesas de dinero rápido.\n\n---\n\n### 📝 FORMATO DE RESPUESTA OBLIGATORIO:\n\nDebes responder SIEMPRE con este esquema estructurado:\n\n📊 Reporte del Agente Legal:\n⚖️ Nivel Legal: [0-100%] (Si es bajo, explica por qué).\n📢 Nivel Marketing: [0-100%] (Si es bajo, explica si falta gancho).\n🤖 Estado Meta Ads: [✅ Apto / ⚠️ Riesgo de Bloqueo]\n💡 Análisis: \n[Una frase breve explicando el mayor error encontrado, si lo hay].\n✨ Versión optimizada: \n[Escribe aquí la versión FINAL perfecta: legalmente segura, con gancho comercial y apta para publicidad en Instagram]."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -16,
+        -144
+      ],
+      "id": "46152206-270a-4302-8cc6-79ce4ca965e7",
+      "name": "Agente Auditor Legal"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        528
+      ],
+      "id": "9a384234-984d-47c5-8ed0-1e8a09033247",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        16
+      ],
+      "id": "195622f3-34c5-4790-9978-1c8a6f76aa2a",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "1fbP16yvfWuPVQjr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-legal",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        -128
+      ],
+      "id": "a96fb0d2-55aa-4822-b359-9d79bf3e09ce",
+      "name": "Webhook1",
+      "webhookId": "88b4a432-1299-4799-9ddf-d52ad214ca92"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        336
+      ],
+      "id": "ca75b338-aecf-4793-93e7-06035fbe8b5e",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "path": "agente-legal/history",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        336
+      ],
+      "id": "2f457a2b-2219-474e-8088-f31edb36b39b",
+      "name": "History Webhook",
+      "webhookId": "88b4a432-1299-4799-9ddf-d52ad214ca92"
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe enviar en el cuerpo del POST.\n - `sessionId` \n - `message` ",
+        "height": 164,
+        "width": 300
+      },
+      "id": "ed79b1b3-3b85-46af-8791-8cee870a14c3",
+      "name": "Instrucciones",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe hacer un GET y enviar como query.\n - `sessionId` ",
+        "height": 148,
+        "width": 300
+      },
+      "id": "5f3873dd-37ee-4ff8-8791-9beede8a81ba",
+      "name": "Instrucciones1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Auditor Legal",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Auditor Legal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Agente Auditor Legal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Auditor Legal": {
+      "main": [
+        []
+      ]
+    },
+    "History Webhook": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7a4ea333-98ab-487c-bf44-83ee5861a5dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "63f5f44f08a3d532bba2756aafa851b9d24d265c72b5b69e5a4300fd687627cd"
+  },
+  "id": "llu70whEl2s0EFML",
+  "tags": []
+}

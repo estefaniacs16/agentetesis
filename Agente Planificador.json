@@ -1,0 +1,201 @@
+{
+  "name": "Agente Planificador",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"respuesta\": \"{{ $json.output }}\"\n}",
+        "options": {
+          "systemMessage": "### ROL\nEres un experto Content Manager especializado en consultoría profesional. Tu única tarea es crear una planificación semanal (Lunes a Viernes) centrada EXCLUSIVAMENTE en el tema que pida el usuario.\n\n### REGLA CRÍTICA DE CONTENIDO\nDebes adaptar cada uno de los 5 días al tema específico solicitado. Por ejemplo, si el usuario pide \"Registro de marcas\", toda la planificación debe girar en torno a propiedad intelectual, no a marketing genérico.\n\n### FORMATO DE SALIDA (OBLIGATORIO)\nUsa solo TEXTO PLANO con EMOJIS. NO USES TABLAS NI HTML.\n\n🌟 LUNES: [Título relacionado al tema]\n— Tipo: 🎓 Educativo\n— Formato: Carrusel\n— Idea: [Explicación detallada aplicada al tema solicitado]\n___________________________________________________\n\n🌟 MARTES: [Título relacionado al tema]\n— Tipo: ⚖️ Caso de Estudio / Storytelling\n— Formato: Imagen + Texto\n— Idea: [Explicación detallada aplicada al tema solicitado]\n___________________________________________________\n\n🌟 MIÉRCOLES: [Título relacionado al tema]\n— Tipo: 💣 Mito vs Realidad\n— Formato: Reel Dinámico\n— Idea: [Explicación detallada aplicada al tema solicitado]\n___________________________________________________\n\n🌟 JUEVES: [Título relacionado al tema]\n— Tipo: 🤝 Venta Suave / Servicio\n— Formato: Historia (Story) o Post\n— Idea: [Explicación detallada aplicada al tema solicitado]\n___________________________________________________\n\n🌟 VIERNES: [Título relacionado al tema]\n— Tipo: 🚀 Tendencia / Viral / Humor\n— Formato: Reel\n— Idea: [Explicación detallada aplicada al tema solicitado]\n___________________________________________________"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        64,
+        128
+      ],
+      "id": "28d64ddc-64cf-419a-8466-5d7e455da0ee",
+      "name": "Agente Planificador"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        688
+      ],
+      "id": "6ff21441-b930-41b8-a7ce-1c4f2f491bc9",
+      "name": "Memoria Planificador"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        336
+      ],
+      "id": "7b9cdfca-a3fa-47c7-a981-0b3a6a02201f",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "1fbP16yvfWuPVQjr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        496
+      ],
+      "id": "37ad6bba-9267-4e02-a86b-317105a76438",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-planificador",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        128
+      ],
+      "id": "c8f3f479-bc37-46d3-9f14-37b98204c71f",
+      "name": "Message Webhook",
+      "webhookId": "88b4a432-1299-4799-9ddf-d52ad214ca92"
+    },
+    {
+      "parameters": {
+        "path": "agente-planificador/history",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        496
+      ],
+      "id": "c721b461-3aba-463f-b0a1-65111b94aee9",
+      "name": "History Webhook",
+      "webhookId": "88b4a432-1299-4799-9ddf-d52ad214ca92"
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe enviar en el cuerpo del POST.\n - `sessionId` \n - `message` ",
+        "height": 164,
+        "width": 300
+      },
+      "id": "9e0155c6-838d-49bc-a00c-c7bfffabc229",
+      "name": "Instrucciones",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe hacer un GET y enviar como query.\n - `sessionId` ",
+        "height": 148,
+        "width": 300
+      },
+      "id": "ba5a86bb-b862-463a-bf95-7f67836bce1c",
+      "name": "Instrucciones1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        464
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Memoria Planificador": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Planificador",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Planificador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Planificador": {
+      "main": [
+        []
+      ]
+    },
+    "Message Webhook": {
+      "main": [
+        [
+          {
+            "node": "Agente Planificador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "History Webhook": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6aace064-e69e-4834-b840-a9bc600a6834",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "63f5f44f08a3d532bba2756aafa851b9d24d265c72b5b69e5a4300fd687627cd"
+  },
+  "id": "uMkGvSW6Own4EQqx",
+  "tags": []
+}

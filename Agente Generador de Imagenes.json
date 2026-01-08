@@ -1,0 +1,318 @@
+{
+  "name": "Agente Generador de Imagenes",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=### ROL\nEres un director de fotografía y experto creativo en Marketing Jurídico de lujo. Tu estándar de calidad es \"fotografía editorial de revista de negocios de alta gama\". Tu objetivo es crear imágenes que sean indistinguibles de una foto real tomada por un profesional.\n\n### TAREA PRINCIPAL\n*Generación de Imagen:* Utiliza SIEMPRE la herramienta generador_de_imagenes. Debes traducir la necesidad del cliente en una escena física y tangible, y describirla con precisión técnica fotográfica.\n\n### REGLA DE ORO PARA EL REALISMO (OBLIGATORIO)\nPara evitar que la herramienta genere estilos anime, dibujo o 3D, **SIEMPRE debes comenzar tu prompt interno** para la imagen con la siguiente estructura exacta de palabras clave técnicas:\n\n> **\"A candid photograph, cinematic lighting, shot on 50mm lens, hyperrealistic, 8k, extremely detailed textures of [aquí describes la escena...]\"**\n\nSi no empiezas así, la imagen fallará.\n\n### GUÍA DE ESTILO VISUAL\n1.  **Iluminación:** Huye de la luz plana. Pide siempre \"luz natural suave\", \"luz de ventana lateral\" o \"hora dorada\" para dar volumen y realismo.\n2.  **Sujetos y Entorno:**\n    * **EVITA:** Balanzas, mazos, gente posando rígidamente, oficinas vacías tipo render 3D.\n    * **PREFIERE:** Gente real en acción (no mirando a cámara), entornos de trabajo \"vividos\" con papeles reales, cafeteras, arrugas en los trajes, texturas de madera auténtica y cristal.\n3.  **Estilo Negativo (Lo que NO queremos):** Asegúrate internamente de que la imagen no parezca una ilustración, un render 3D, un videojuego o anime. Debe parecer una foto robada de la realidad.\n\n### CONTEXTO DEL CLIENTE (Chat Input)\n{{ $json.body.message }}\n\n### FORMATO DE RESPUESTA\nPresenta tu respuesta de la siguiente manera:\n(Aquí se mostrará el url de la imagen generada por la herramienta).\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        144,
+        -32
+      ],
+      "id": "26c0598b-e4a2-4e0d-bcae-50754b82fff3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        656
+      ],
+      "id": "7889f2fe-3757-497e-9855-202a71946967",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Úsala para generar imágenes. Envía como argumento un prompt descriptivo en español que detalle una escena legal profesional.",
+        "workflowId": {
+          "__rl": true,
+          "value": "BFKyYB58XSEooiWQ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/BFKyYB58XSEooiWQ",
+          "cachedResultName": "generador_de_imagenes"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "generate_image_prompt": "={{$fromAI(\"generate_image_prompt\")}}"
+          },
+          "matchingColumns": [
+            "generate_image_prompt"
+          ],
+          "schema": [
+            {
+              "id": "generate_image_prompt",
+              "displayName": "generate_image_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        224
+      ],
+      "id": "71804447-26e9-4ba9-9142-bd4c288852ce",
+      "name": "generador_de_imagenes"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        112,
+        208
+      ],
+      "id": "fdf2e94a-f23f-417d-b059-e15d2d17355c",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "1fbP16yvfWuPVQjr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-de-imagen",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        16
+      ],
+      "id": "4a81d1fa-bba6-4101-8d6b-561c74b94d1b",
+      "name": "Webhook",
+      "webhookId": "7010b7a4-5e5c-44f0-bc18-16e1ebf56376"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        480
+      ],
+      "id": "0d5bc163-15e6-4e76-97aa-7a204c164089",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "path": "agente-de-imagen/history",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -64,
+        480
+      ],
+      "id": "51ec57f9-45d1-4add-9495-31c483ac144b",
+      "name": "History Webhook",
+      "webhookId": "88b4a432-1299-4799-9ddf-d52ad214ca92"
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe hacer un GET y enviar como query.\n - `sessionId` ",
+        "height": 148,
+        "width": 300
+      },
+      "id": "7d632467-5ca8-42ff-a0e8-425550015654",
+      "name": "Instrucciones1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe enviar en el cuerpo del POST.\n - `sessionId` \n - `message` ",
+        "height": 164,
+        "width": 300
+      },
+      "id": "53e2dbaf-e293-453e-8434-a89eed143bc1",
+      "name": "Instrucciones",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"image_description\": {\n      \"type\": \"string\",\n      \"description\": \"Un comentario y descripción breve y profesional sobre la imagen.\"\n    },\n    \"image_url\": {\n      \"type\": \"string\",\n      \"description\": \"La URL completa obtenida de la tool generador_de_imagenes\"\n    }\n  },\n  \"required\": [\"output\", \"image_url\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        224
+      ],
+      "id": "85f1d678-bfa4-4557-b939-414af28d5ca5",
+      "name": "Structured Output Parser1"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n-service-38gz.onrender.com",
+            "user-agent": "node",
+            "content-length": "88",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "*",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "157.100.89.228",
+            "cf-ipcountry": "EC",
+            "cf-ray": "9b8f212b8966c962-PDX",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "render-proxy-ttl": "4",
+            "rndr-id": "52cd6f06-0147-458c",
+            "sec-fetch-mode": "cors",
+            "true-client-ip": "157.100.89.228",
+            "x-forwarded-for": "157.100.89.228, 104.23.160.99, 10.18.21.25",
+            "x-forwarded-proto": "https",
+            "x-request-start": "1767575779203146"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "sessionId": "1767575763849",
+            "message": "haz una imagen de uin abogado leyendo un libto"
+          },
+          "webhookUrl": "https://n8n-service-38gz.onrender.com/webhook/agente-de-imagen",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generador_de_imagenes": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "History Webhook": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "90895155-df30-405a-befa-345a8d94b713",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "63f5f44f08a3d532bba2756aafa851b9d24d265c72b5b69e5a4300fd687627cd"
+  },
+  "id": "FoXziWca57DDMCJI",
+  "tags": []
+}

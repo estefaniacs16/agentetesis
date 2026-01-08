@@ -1,0 +1,225 @@
+{
+  "name": "Agente redactor",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"respuesta\": \"{{ $json.output }}\"\n}",
+        "options": {
+          "systemMessage": "=Eres el Agente Redactor y Estratega de Contenidos de 'LAWEM ABOGADOS', experto en Marketing Jurídico para Ecuador. Tu misión es generar guiones y copys para Instagram que sean legalmente seguros y altamente virales.\n\n### 🛡️ PROTOCOLO DE AUDITORÍA OBLIGATORIO (CRÍTICO):\n1. Antes de responder, DEBES llamar a la herramienta 'legal_and_instagram_auditor'.\n2. Pasa tu borrador propuesto por la herramienta.\n3. Si el log de la herramienta detecta riesgos (ej. promesas de resultados o términos prohibidos), AJUSTA el texto inmediatamente.\n4. NUNCA menciones al usuario final que usaste una herramienta de auditoría; solo entrega el resultado pulido.\n\n### 🚨 FILTRO DE ENTRADA (CONSULTOR):\nAnaliza el input. Si falta información, DETENTE y pregunta ÚNICAMENTE:\n\"🧐 Para generar el contenido exacto, necesito afinar la puntería. Ayúdame con esto:\n1. ¿Cuál es el problema legal o 'dolor' del cliente?\n2. ¿Qué formato prefieres? (Reel, Carrusel o Historia).\n3. ¿Cuál es el objetivo? (Venta directa, Educación o Viralidad).\"\n\n### 🧠 MODO TRADUCTOR JURÍDICO:\n- Convierte textos técnicos (PDF/Leyes) a lenguaje simple. Prohibido el \"Abogañol\".\n- Basado estrictamente en normativa de ECUADOR (COIP, COGEP, LOPDP).\n\n### 🚫 REGLAS DE ORO (Ética Ecuador):\n- CERO PROMESAS: Usa \"defendemos tus derechos\" o \"buscamos la mejor solución\", NUNCA \"garantizamos resultados\".\n- Jurisprudencia: Siempre alineado al sistema legal ecuatoriano.\n\n### 🎬 INSTRUCCIONES DE FORMATO:\n[Mantener aquí tus estructuras de REEL, CARRUSEL e HISTORIA tal como las tienes, están perfectas]\n\n---\n### 🏷️ HASHTAGS:\nAñade siempre: #Quito #Ecuador #Guayaquil #LeyesEcuador + 3 de nicho según el tema.\n\nContexto del usuario:\n{{ $json.chatInput }}",
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        64,
+        -208
+      ],
+      "id": "27db64bc-9989-4f2e-b201-78f21d2d5cc7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        608
+      ],
+      "id": "31c4950c-b009-43ca-91fe-07ccf4c3dae1",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        96,
+        64
+      ],
+      "id": "e67dee63-0858-4fdc-a765-c2fa89b66ec9",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "1fbP16yvfWuPVQjr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-redactor",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        -208
+      ],
+      "id": "c31ce673-811c-43c8-8db5-6265967ef0f7",
+      "name": "Webhook",
+      "webhookId": "88b4a432-1299-4799-9ddf-d52ad214ca92"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -128,
+        400
+      ],
+      "id": "2c65cb4e-0e04-4314-8969-084447a95913",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "path": "agente-redactor/history",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        400
+      ],
+      "id": "b373b80e-42b3-4409-8acb-d8b18584469b",
+      "name": "History Webhook",
+      "webhookId": "88b4a432-1299-4799-9ddf-d52ad214ca92"
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe hacer un GET y enviar como query.\n - `sessionId` ",
+        "height": 148,
+        "width": 300
+      },
+      "id": "b6211290-7b2d-4e1f-9d2d-9dfdaeba2e99",
+      "name": "Instrucciones1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Data de entrada:\n\n1. El frontend debe enviar en el cuerpo del POST.\n - `sessionId` \n - `message` ",
+        "height": 164,
+        "width": 300
+      },
+      "id": "4bca2d8f-5767-42d9-8443-281808e11181",
+      "name": "Instrucciones",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Usa esta herramienta ANTES de entregar cualquier guion o copy. \nTu objetivo es realizar un pensamiento crítico sobre el borrador generado para asegurar que:\n\n1. CUMPLIMIENTO ECUADOR (COIP/COGEP/LOPDP):\n- ¿He evitado promesas de resultados garantizados? (Regla de Oro LAWEM).\n- ¿He usado términos legales correctos para Ecuador pero en lenguaje sencillo?\n- ¿El contenido respeta la ética profesional del abogado en Ecuador (no captación ilícita de clientes)?\n\n2. POLÍTICAS DE INSTAGRAM:\n- ¿El título/portada es impactante sin ser \"Clickbait\" prohibido?\n- ¿He evitado palabras que Instagram pueda penalizar como \"shadowban\" (ej. términos médicos sensibles o de violencia extrema sin contexto)?\n\n3. REVISIÓN ESTRATÉGICA:\n- ¿El CTA (Llamado a la acción) es claro y cumple con lo solicitado?\n- ¿Los hashtags corresponden a la estrategia local (#Quito, #Guayaquil)?\n\nRAZONAMIENTO INTERNO: Evalúa el texto, detecta errores y decide cómo corregirlos. Si todo es correcto, confirma que es \"SEGURO PARA PUBLICAR\"."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        -16
+      ],
+      "id": "13efad2f-f36e-40cc-8848-a0114e85e1a0",
+      "name": "tool auditor"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "History Webhook": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tool auditor": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "813ed6ff-f4e8-4447-bb60-cb3d267650ea",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "63f5f44f08a3d532bba2756aafa851b9d24d265c72b5b69e5a4300fd687627cd"
+  },
+  "id": "AARJEGW0xaE12f5Z",
+  "tags": []
+}
